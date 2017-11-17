@@ -9,14 +9,14 @@
 /* entry point address for ELF */
 ENTRY(Reset_Handler)
 
-/* place stack at end of 8K SRAM */
-_estack = 0x20002000;
+/* place stack at end of 4K SRAM */
+_estack = 0x20000FFF;
 
 /* Specify the memory areas */
 MEMORY
 {
-  FLASH (rx)	: ORIGIN = 0x08000000, LENGTH = 64K
-  RAM (xrw) 	: ORIGIN = 0x20000000, LENGTH = 8K
+  FLASH (rx)	: ORIGIN = 0x08000000, LENGTH = 32K
+  RAM (xrw) 	: ORIGIN = 0x20000000, LENGTH = 4K
 }
 
 SECTIONS
@@ -33,25 +33,25 @@ SECTIONS
 
   .rodata :
   {
-    . = ALIGN(8);
+    . = ALIGN(4);
     *(.rodata)
     *(.rodata*)
-    . = ALIGN(8);
+    . = ALIGN(4);
   } >FLASH
 
   _sidata = LOADADDR(.data);
 
   .data :
   {
-    . = ALIGN(8);
+    . = ALIGN(4);
     _sdata = .;
     *(.data)
     *(.data*)
-    . = ALIGN(8);
+    . = ALIGN(4);
     _edata = .;
   } >RAM AT> FLASH
 
-  . = ALIGN(8);
+  . = ALIGN(4);
   .bss :
   {
     _sbss = .;
@@ -60,7 +60,7 @@ SECTIONS
     *(.bss*)
     *(COMMON)
 
-    . = ALIGN(8);
+    . = ALIGN(4);
     _ebss = .;
     __bss_end__ = _ebss;
   } >RAM

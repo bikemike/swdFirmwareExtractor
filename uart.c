@@ -10,7 +10,7 @@
 #include "main.h"
 #include "uart.h"
 
-#define UART_WAIT_TRANSMIT do { ; } while (!(USART2->ISR & USART_ISR_TXE));
+#define UART_WAIT_TRANSMIT do { ; } while (!(USART1->ISR & USART_ISR_TXE));
 #define UART_BUFFER_LEN (12u)
 
 static const char chrTbl[] = "0123456789ABCDEF";
@@ -28,20 +28,24 @@ void uartInit( void )
 
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
 
-	/* USART2 configuration */
-	RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
-	GPIOA->MODER |= GPIO_MODER_MODER2_1 | GPIO_MODER_MODER3_1;
-	GPIOA->OSPEEDR |= (GPIO_OSPEEDR_OSPEEDR2_0 | GPIO_OSPEEDR_OSPEEDR2_1) | (GPIO_OSPEEDR_OSPEEDR3_0 | GPIO_OSPEEDR_OSPEEDR3_1);
-	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR2_1 | GPIO_PUPDR_PUPDR3_1;
-	GPIOA->AFR[0] = (0x01u << (2u * 4u)) | (0x01u << (3u * 4u));
-	USART2->CR2 = 0u;
-	USART2->BRR = 0x1A1u; /* 115200 Baud at 48 MHz clock */
-	USART2->CR1 = USART_CR1_UE | USART_CR1_RE | USART_CR1_TE;
-
+	/* USART1 configuration */
+	RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+	GPIOA->MODER |= GPIO_MODER_MODER2_1 | GPIO_MODER_MODER3_1 | GPIO_MODER_MODER14_1;
+	//GPIOA->OSPEEDR |= (GPIO_OSPEEDR_OSPEEDR2_0 | GPIO_OSPEEDR_OSPEEDR2_1) | (GPIO_OSPEEDR_OSPEEDR3_0 | GPIO_OSPEEDR_OSPEEDR3_1);
+	GPIOA->OSPEEDR |= (GPIO_OSPEEDR_OSPEEDR2_0 | GPIO_OSPEEDR_OSPEEDR2_1) | (GPIO_OSPEEDR_OSPEEDR3_0 | GPIO_OSPEEDR_OSPEEDR3_1) | (GPIO_OSPEEDR_OSPEEDR14_0 | GPIO_OSPEEDR_OSPEEDR14_1);
+	//GPIOA->PUPDR |= GPIO_PUPDR_PUPDR2_1 | GPIO_PUPDR_PUPDR3_1 | GPIO_PUPDR_PUPDR14_1;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR3_1 | GPIO_PUPDR_PUPDR14_1;
+	//GPIOA->AFR[0] = (0x01u << (2u * 4u)) | (0x01u << (3u * 4u));
+	GPIOA->AFR[0] = (0x01u << (3u * 4u)); // rx swapped to tx
+	GPIOA->AFR[1] = (0x01u << ((uint32_t)((uint32_t)14 &(uint32_t)0x07) * 4)); // tx swapped to rx
+	USART1->CR2 = 0u;
+	USART1->CR2 |= USART_CR2_SWAP;
+	USART1->BRR = 0x1A1u; /* 115200 Baud at 48 MHz clock */
+	USART1->CR1 = USART_CR1_UE | USART_CR1_RE | USART_CR1_TE;
 	/* Flush UART buffers */
-	uartData = USART2->RDR;
-	uartData = USART2->RDR;
-	uartData = USART2->RDR;
+	uartData = USART1->RDR;
+	uartData = USART1->RDR;
+	uartData = USART1->RDR;
 
 	return ;
 }
@@ -168,9 +172,9 @@ void uartReceiveCommands( uartControl_t * const ctrl )
 {
 	uint8_t uartData = 0u;
 
-	if (USART2->ISR & USART_ISR_RXNE)
+	if (USART1->ISR & USART_ISR_RXNE)
 	{
-		uartData = USART2->RDR;
+		uartData = USART1->RDR;
 
 		switch (uartData)
 		{
@@ -234,7 +238,7 @@ void uartSendWordBinLE( uint32_t const val )
 
 	for (i = 0u; i < 4u; ++i)
 	{
-		USART2->TDR = tval & 0xFFu;
+		USART1->TDR = tval & 0xFFu;
 		tval >>= 8u;
 		UART_WAIT_TRANSMIT;
 	}
@@ -250,7 +254,7 @@ void uartSendWordBinBE( uint32_t const val )
 
 	for (i = 0u; i < 4u; ++i)
 	{
-		USART2->TDR = ((tval >> ((3u - i) << 3u)) & 0xFFu);
+		USART1->TDR = ((tval >> ((3u - i) << 3u)) & 0xFFu);
 		UART_WAIT_TRANSMIT;
 	}
 
@@ -308,7 +312,7 @@ void uartSendStr( const char * const str )
 
 	while (*strptr)
 	{
-		USART2->TDR = *strptr;
+		USART1->TDR = *strptr;
 		++strptr;
 		UART_WAIT_TRANSMIT;
 	}

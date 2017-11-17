@@ -1,15 +1,15 @@
 /**
   ******************************************************************************
-  * @file      startup_stm32f051.s
+  * @file      startup_stm32f0xx.s
   * @author    MCD Application Team
   * @version   V1.3.2
   * @date      27-March-2014
-  * @brief     STM32F051 Devices vector table for Atollic toolchain.
+  * @brief     STM32F030 Devices vector table for RIDE7 toolchain.
   *            This module performs:
   *                - Set the initial SP
   *                - Set the initial PC == Reset_Handler,
   *                - Set the vector table entries with the exceptions ISR address
-  *                - Configure the system clock
+  *                - Configure the system clock 
   *                - Branches to main in the C library (which eventually
   *                  calls main()).
   *            After Reset the Cortex-M0 processor is in Thread mode,
@@ -53,6 +53,16 @@ defined in linker script */
 .word _sbss
 /* end address for the .bss section. defined in linker script */
 .word _ebss
+
+.equ  BootRAM, 0xF108F85F
+/**
+ * @brief  This is the code that gets called when the processor first
+ *          starts execution following a reset event. Only the absolutely
+ *          necessary set is performed, after which the application
+ *          supplied main() routine is called.
+ * @param  None
+ * @retval : None
+*/
 
   .section .text.Reset_Handler
   .weak Reset_Handler
@@ -112,11 +122,9 @@ LoopFillZerobss:
   cmp r2, r3
   bcc FillZerobss
 
-/* Do not do any initialization */
 /* Call the clock system intitialization function.*/
 /*    bl  SystemInit*/
-/* Call static constructors */
-/*    bl __libc_init_array*/
+    
 /* Call the application's entry point.*/
   bl main
   
@@ -150,6 +158,7 @@ Infinite_Loop:
   .type g_pfnVectors, %object
   .size g_pfnVectors, .-g_pfnVectors
 
+
 g_pfnVectors:
   .word _estack
   .word Reset_Handler
@@ -171,23 +180,23 @@ g_pfnVectors:
 
 
   .word WWDG_IRQHandler
-  .word PVD_IRQHandler
+  .word 0  
   .word RTC_IRQHandler
   .word FLASH_IRQHandler
   .word RCC_IRQHandler
   .word EXTI0_1_IRQHandler
   .word EXTI2_3_IRQHandler
   .word EXTI4_15_IRQHandler
-  .word TS_IRQHandler
+  .word 0  
   .word DMA1_Channel1_IRQHandler
   .word DMA1_Channel2_3_IRQHandler
   .word DMA1_Channel4_5_IRQHandler
-  .word ADC1_COMP_IRQHandler 
+  .word ADC1_IRQHandler 
   .word TIM1_BRK_UP_TRG_COM_IRQHandler
   .word TIM1_CC_IRQHandler
-  .word TIM2_IRQHandler
+  .word 0  
   .word TIM3_IRQHandler
-  .word TIM6_DAC_IRQHandler
+  .word 0   
   .word 0  
   .word TIM14_IRQHandler
   .word TIM15_IRQHandler
@@ -200,9 +209,12 @@ g_pfnVectors:
   .word USART1_IRQHandler
   .word USART2_IRQHandler
   .word 0
-  .word CEC_IRQHandler
   .word 0
+  .word 0
+  .word BootRAM          /* @0x108. This is for boot in RAM mode for 
+                            STM32F0xx devices. */
  
+
 /*******************************************************************************
 *
 * Provide weak aliases for each Exception handler to the Default_Handler.
@@ -228,10 +240,7 @@ g_pfnVectors:
 
   .weak WWDG_IRQHandler
   .thumb_set WWDG_IRQHandler,Default_Handler
-
-  .weak PVD_IRQHandler
-  .thumb_set PVD_IRQHandler,Default_Handler
-  
+ 
   .weak RTC_IRQHandler
   .thumb_set RTC_IRQHandler,Default_Handler
   
@@ -250,9 +259,6 @@ g_pfnVectors:
   .weak EXTI4_15_IRQHandler
   .thumb_set EXTI4_15_IRQHandler,Default_Handler
   
-  .weak TS_IRQHandler
-  .thumb_set TS_IRQHandler,Default_Handler
-  
   .weak DMA1_Channel1_IRQHandler
   .thumb_set DMA1_Channel1_IRQHandler,Default_Handler
   
@@ -262,24 +268,18 @@ g_pfnVectors:
   .weak DMA1_Channel4_5_IRQHandler
   .thumb_set DMA1_Channel4_5_IRQHandler,Default_Handler
   
-  .weak ADC1_COMP_IRQHandler
-  .thumb_set ADC1_COMP_IRQHandler,Default_Handler
+  .weak ADC1_IRQHandler
+  .thumb_set ADC1_IRQHandler,Default_Handler
    
   .weak TIM1_BRK_UP_TRG_COM_IRQHandler
   .thumb_set TIM1_BRK_UP_TRG_COM_IRQHandler,Default_Handler
   
   .weak TIM1_CC_IRQHandler
   .thumb_set TIM1_CC_IRQHandler,Default_Handler
-  
-  .weak TIM2_IRQHandler
-  .thumb_set TIM2_IRQHandler,Default_Handler
-  
+    
   .weak TIM3_IRQHandler
   .thumb_set TIM3_IRQHandler,Default_Handler
-  
-  .weak TIM6_DAC_IRQHandler
-  .thumb_set TIM6_DAC_IRQHandler,Default_Handler
-  
+    
   .weak TIM14_IRQHandler
   .thumb_set TIM14_IRQHandler,Default_Handler
   
@@ -310,7 +310,6 @@ g_pfnVectors:
   .weak USART2_IRQHandler
   .thumb_set USART2_IRQHandler,Default_Handler
   
-  .weak CEC_IRQHandler
-  .thumb_set CEC_IRQHandler,Default_Handler
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

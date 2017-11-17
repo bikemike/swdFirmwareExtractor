@@ -6,17 +6,26 @@
 # you can obtain one at https://opensource.org/licenses/MIT
 #
 
+TARGET=swdFirmwareExtractor
+EXECUTABLE=$(TARGET).elf
+
 #compiler flags
-CFLAGS = -mthumb -mcpu=cortex-m0 -g3 -O0 -D STM32F051 -Wall -Wextra
+CFLAGS = -mthumb -mcpu=cortex-m0 -g3 -O0 -D STM32F030 -Wall -Wextra
 
 #linker flags
 LDFLAGS = -T link.ld -nostartfiles
 
 #cross compiler
 CC = arm-none-eabi-gcc
+CP = arm-none-eabi-objcopy
+
+all: $(TARGET)
+
+$(TARGET): $(EXECUTABLE)
+	$(CP) -O binary $^ $@
 
 
-all: main.o clk.o swd.o target.o uart.o st/startup_stm32f0.o
+$(EXECUTABLE): main.o clk.o swd.o target.o uart.o st/startup_stm32f0.o
 	$(CC) $(LDFLAGS) $(CFLAGS) main.o clk.o swd.o target.o uart.o st/startup_stm32f0.o -o swdFirmwareExtractor.elf
 
 main.o: main.c main.h
@@ -39,3 +48,14 @@ st/startup_stm32f0.o: st/startup_stm32f0.S
 
 clean:
 	rm -f main.o clk.o swd.o target.o uart.o st/startup_stm32f0.o
+
+
+erase:
+	openocd -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f0x.cfg -c init -c "reset halt" -c "stm32f0x unlock 0" -c "reset run" -c shutdown
+
+flash:
+	openocd -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f0x.cfg -c init -c "reset halt" -c "flash write_image erase $(TARGET) 0x08000000" -c "verify_image $(TARGET) 0x08000000" -c "reset run" -c shutdown
+
+flashbwoop:
+	openocd -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f0x.cfg -c init -c "reset halt" -c "flash write_image erase cli/bwhoop.bin 0x08000000" -c "verify_image cli/bwhoop.bin 0x08000000" -c "reset run" -c shutdown
+

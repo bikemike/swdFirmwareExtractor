@@ -26,15 +26,15 @@
 #define PIN_LED_GREEN (9u)
 #define PIN_BUTTON (0u)
 
-#define MAX_READ_ATTEMPTS (100u)
+#define MAX_READ_ATTEMPTS (1000u)
 
 /* all times in milliseconds */
 /* minimum wait time between reset deassert and attack */
-#define DELAY_JITTER_MS_MIN (20u)
+#define DELAY_JITTER_MS_MIN (25u)
 /* increment per failed attack */
 #define DELAY_JITTER_MS_INCREMENT (1u)
 /* maximum wait time between reset deassert and attack */
-#define DELAY_JITTER_MS_MAX (50u)
+#define DELAY_JITTER_MS_MAX (45u)
 
 /* flash readout statistics */
 typedef struct {

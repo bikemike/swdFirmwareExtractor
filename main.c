@@ -41,7 +41,7 @@ static swdStatus_t extractFlashData( uint32_t const address, uint32_t * const da
 	/* try up to MAX_READ_TRIES times until we have the data */
 	do
 	{
-		GPIO_LED_GREEN->ODR &= ~(0x01u << PIN_LED_GREEN);
+		//GPIO_LED_GREEN->ODR &= ~(0x01u << PIN_LED_GREEN);
 
 		targetSysOn();
 
@@ -81,7 +81,7 @@ static swdStatus_t extractFlashData( uint32_t const address, uint32_t * const da
 		{
 			*data = extractedData;
 			++(extractionStatistics.numSuccess);
-			GPIO_LED_GREEN->ODR |= (0x01u << PIN_LED_GREEN);
+			//GPIO_LED_GREEN->ODR |= (0x01u << PIN_LED_GREEN);
 		}
 		else
 		{
@@ -129,18 +129,22 @@ int main()
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOCEN | RCC_AHBENR_GPIODEN | RCC_AHBENR_GPIOEEN | RCC_AHBENR_GPIOFEN;
 	targetSysCtrlInit();
 	swdCtrlInit();
-	uartInit();
 
 	clkEnablePLLInt();
 	clkEnableSystick();
 
 	/* Board LEDs */
-	GPIO_LED_BLUE->MODER |= (0x01u << (PIN_LED_BLUE << 1u));
-	GPIO_LED_GREEN->MODER |= (0x01u << (PIN_LED_GREEN << 1u));
-	GPIO_LED_BLUE->OSPEEDR |= (0x03 << (PIN_LED_BLUE << 1u));
-	GPIO_LED_GREEN->OSPEEDR |= (0x03u << (PIN_LED_GREEN << 1u));
-	GPIO_LED_BLUE->ODR |= (0x01u << PIN_LED_BLUE);
+//#define GPIO_LED_GREEN GPIOA
+//#define PIN_LED_GREEN 3u
+	//GPIO_LED_BLUE->MODER |= (0x01u << (PIN_LED_BLUE << 1u));
+	//GPIO_LED_GREEN->MODER |= (0x01u << (PIN_LED_GREEN << 1u));
+	//GPIO_LED_BLUE->OSPEEDR |= (0x03 << (PIN_LED_BLUE << 1u));
+	//GPIO_LED_GREEN->OSPEEDR |= (0x03u << (PIN_LED_GREEN << 1u));
+	//GPIO_LED_BLUE->ODR |= (0x01u << PIN_LED_BLUE);
 
+	waitms(10000);
+
+	uartInit();
 
 
 	uartControl.transmitHex = 0u;
@@ -158,10 +162,20 @@ int main()
 
 	while (1u)
 	{
+		//GPIO_LED_GREEN->ODR |= (0x01u << PIN_LED_GREEN);
+		//waitms(250);
+		//GPIO_LED_GREEN->ODR &= ~(0x01u << PIN_LED_GREEN);
+
+		//uartSendStr("Success: 0x");
+		//waitms(250);
+		//continue;
+
 		uartReceiveCommands( &uartControl );
 
 		/* Start as soon as the button B1 has been pushed */
-		if (GPIO_BUTTON->IDR & (0x01u << (PIN_BUTTON)))
+		//waitms(5000);
+		//if (GPIO_BUTTON->IDR & (0x01u << (PIN_BUTTON)))
+		if(0)
 		{
 			btnActive = 1u;
 		}

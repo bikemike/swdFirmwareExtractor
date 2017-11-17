@@ -15,11 +15,11 @@
 #define RCC_AHBENR_GPIO_SWDIO (RCC_AHBENR_GPIOAEN)
 #define RCC_AHBENR_GPIO_SWCLK (RCC_AHBENR_GPIOAEN)
 
-#define GPIO_SWDIO (GPIOA)
-#define PIN_SWDIO (10u)
+#define GPIO_SWDIO (GPIOB)
+#define PIN_SWDIO (1u)
 
 #define GPIO_SWCLK (GPIOA)
-#define PIN_SWCLK (11u)
+#define PIN_SWCLK (4u)
 
 
 /* Internal SWD status. There exist combined SWD status values (e.g. 0x60), since subsequent command replys are OR'ed. Thus there exist cases where the previous command executed correctly (returned 0x20) and the following command failed (returned 0x40), resulting in 0x60. */

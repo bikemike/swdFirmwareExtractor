@@ -14,10 +14,10 @@
 #define RCC_AHBENR_GPIO_POWER (RCC_AHBENR_GPIOAEN)
 
 #define GPIO_RESET (GPIOA)
-#define PIN_RESET (12u)
+#define PIN_RESET (6u)
 
 #define GPIO_POWER (GPIOA)
-#define PIN_POWER (9u)
+#define PIN_POWER (7u)
 
 
 void targetSysCtrlInit( void );
