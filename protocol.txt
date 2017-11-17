@@ -1,0 +1,67 @@
+Communication protocol documentation
+
+UART interface, 3.3V signal levels
+Pin PA2: TX (microcontroller -> PC)
+Pin PA3: RX (microcontroller <- PC)
+115200 Baud (115k2 Baud)
+8 Bit
+No Parity
+1 Stop Bit
+
+Each command consists of 1 up to several characters followed by a newline (\n). \r and \r\n is also accepted as command ending.
+
+- Set the start address for firmware extraction (default: 0 = 0x00000000 = "A00000000"):
+	AXXXXXXXX\n (where XXXXXXXX is the address HEX. E.g., send A08000000\n to start firmware extraction from address 0x08000000)
+
+- Set the length of data extraction (default: 65535 = 0x10000 = "L00010000"):
+	LXXXXXXXX\n (where XXXXXXXX is the length in HEX. E.g., send L00001000\n to extract 0x1000 = 4096 bytes of data.)
+
+- Set BIN output mode (default):
+	B\n
+
+- Set HEX output mode:
+	H\n
+
+- Select Little Endian output (default):
+	e\n
+
+- Select Big Endian output:
+	E\n
+
+- Start Firmware extraction:
+	S\n
+
+- Print statistics:
+	P\n
+
+
+The microcontroller will acknowledge every valid command with a human-readible reply containing the current setting. An invalid command will be rejected with "ERROR: unknown command". Each reply microcontroller->PC is ended by \r\n.
+The address as well as the length (A and L commands) will be automatically adjusted to 32-bit alignment.
+
+Example for HEX output mode, the firmware dump is also ended by \r\n:
+AF77D29D 1526DB04 8316DC73 120B63E3 843B6494 \r\n
+
+In BIN mode, the firmware is sent directly in binary form without any modification (\r\n at the end is also omitted).
+
+Little Endian mode is recommended for firmware extraction. Disassemblers like radare2 expect the firmware binary to be in little endian. Strings will be directly readible when using little endian.
+
+The success ratio depends on bus load and other parameters. If a read access fails, it will be retried automatically.
+When reading an address failes for more than 100 times, the extraction will be aborted, since there is a major issue. The system will print
+\r\n!ExtractionFailureXXXXXXXX\r\n
+where XXXXXXXX is the SWD status in hex. (see swd.h swdStatus_t).
+Reasons can be:
+- Incorrect connection (SWD, Reset and Power connected correctly? Have you removed any (additional) debugger form the SWD?)
+- The chip is not affected by the exploit (may apply to future revisions, if ST decides to update their IC masks...) 
+- You are trying to read into non-existant memory (e.g. Trying to read 128KBytes out of a 64KByte device)
+
+
+The statistics function prints the following data in Hex:
+Statistics: \r\n
+Attempts: 0x00001234\r\n
+Success: 0x00001200\r\n
+Failure: 0x00000034\r\n
+
+Statistics are reset each time the system start extraction (= when the "S" command is received).
+Attempts: Number of total read attempts (Sum of Success and Failure)
+Success: Number of successful reads
+Failure: Nummer of unsuccessful reads
